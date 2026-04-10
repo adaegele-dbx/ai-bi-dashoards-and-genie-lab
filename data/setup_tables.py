@@ -66,6 +66,16 @@ df_suppliers.write.format("delta").mode("overwrite").option("overwriteSchema", "
     .saveAsTable(f"{catalog}.{schema}.suppliers")
 print(f"suppliers: {df_suppliers.count()} rows written.")
 
+# Table and column descriptions
+spark.sql(f"COMMENT ON TABLE {catalog}.{schema}.suppliers IS 'Directory of approved suppliers with geographic and performance metadata. Each supplier belongs to one region and country, with contracted lead times and historical reliability ratings.'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.suppliers ALTER COLUMN supplier_id COMMENT 'Unique supplier identifier (e.g. SUP-001)'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.suppliers ALTER COLUMN supplier_name COMMENT 'Display name of the supplier'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.suppliers ALTER COLUMN region COMMENT 'Geographic region the supplier operates in (North America, Europe, Asia-Pacific, South America, Africa)'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.suppliers ALTER COLUMN country COMMENT 'Country where the supplier is based'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.suppliers ALTER COLUMN lead_time_days COMMENT 'Contracted lead time in calendar days from order placement to expected delivery'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.suppliers ALTER COLUMN reliability_rating COMMENT 'Historical reliability score from 1.0 (worst) to 5.0 (best), based on on-time delivery track record'")
+print("suppliers: table and column descriptions added.")
+
 # COMMAND ----------
 
 # MAGIC %md
@@ -126,6 +136,16 @@ df_products = spark.createDataFrame(products, schema=products_schema)
 df_products.write.format("delta").mode("overwrite").option("overwriteSchema", "true") \
     .saveAsTable(f"{catalog}.{schema}.products")
 print(f"products: {df_products.count()} rows written.")
+
+# Table and column descriptions
+spark.sql(f"COMMENT ON TABLE {catalog}.{schema}.products IS 'Product catalog with cost and physical attributes. Each product belongs to one category and is sourced from a single supplier.'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.products ALTER COLUMN product_id COMMENT 'Unique product identifier (e.g. PROD-001)'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.products ALTER COLUMN product_name COMMENT 'Human-readable product name'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.products ALTER COLUMN category COMMENT 'Product category: Electronics Components, Raw Materials, or Packaging'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.products ALTER COLUMN unit_cost COMMENT 'Standard cost per unit in USD'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.products ALTER COLUMN supplier_id COMMENT 'Foreign key to the suppliers table — the supplier that provides this product'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.products ALTER COLUMN weight_kg COMMENT 'Weight per unit in kilograms'")
+print("products: table and column descriptions added.")
 
 # COMMAND ----------
 
@@ -290,6 +310,16 @@ df_inventory = spark.createDataFrame(inventory_snapshots, schema=inv_schema)
 df_inventory.write.format("delta").mode("overwrite").option("overwriteSchema", "true") \
     .saveAsTable(f"{catalog}.{schema}.inventory_snapshots")
 print(f"inventory_snapshots: {df_inventory.count()} rows written.")
+
+# Table and column descriptions
+spark.sql(f"COMMENT ON TABLE {catalog}.{schema}.inventory_snapshots IS 'Weekly point-in-time snapshots of warehouse inventory levels by product and location. Used to track stock health and identify items that need replenishment.'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.inventory_snapshots ALTER COLUMN snapshot_date COMMENT 'Date of the weekly inventory count'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.inventory_snapshots ALTER COLUMN product_id COMMENT 'Foreign key to the products table'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.inventory_snapshots ALTER COLUMN warehouse COMMENT 'Warehouse location: Chicago, Atlanta, Seattle, or Dallas'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.inventory_snapshots ALTER COLUMN quantity_on_hand COMMENT 'Current stock level at this warehouse'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.inventory_snapshots ALTER COLUMN reorder_point COMMENT 'Minimum stock threshold; falling below this triggers a replenishment order'")
+spark.sql(f"ALTER TABLE {catalog}.{schema}.inventory_snapshots ALTER COLUMN quantity_on_order COMMENT 'Units currently on order from suppliers and not yet received'")
+print("inventory_snapshots: table and column descriptions added.")
 
 # COMMAND ----------
 

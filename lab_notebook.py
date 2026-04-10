@@ -603,17 +603,28 @@
 # MAGIC %md
 # MAGIC ### 4a. Add table and column descriptions with synonyms
 # MAGIC
-# MAGIC Genie reads Unity Catalog metadata, but out-of-the-box column names like
-# MAGIC `lead_time_days` or `quantity_on_hand` lack business context.  Adding
-# MAGIC **descriptions** and **synonyms** in the knowledge store helps Genie match
-# MAGIC natural language questions to the right columns.
+# MAGIC Genie reads Unity Catalog metadata, so table and column descriptions in
+# MAGIC Unity Catalog are automatically available to Genie.  The setup script already
+# MAGIC added descriptions for the `suppliers`, `products`, and `inventory_snapshots`
+# MAGIC tables — but we intentionally left **`purchase_orders`** undescribed so you
+# MAGIC can practice adding them yourself.
 # MAGIC
 # MAGIC 1. In your Genie space, open the **knowledge store** (click the book icon or
 # MAGIC    go to Settings → Knowledge store)
-# MAGIC 2. Click on the **`purchase_orders`** table and add these **column descriptions**:
+# MAGIC 2. Click on the **`purchase_orders`** table and add a **table description**:
+# MAGIC
+# MAGIC > Six months of purchase orders (Oct 2024 – Mar 2025) tracking the full order
+# MAGIC > lifecycle from placement through delivery. Each order links to a product and
+# MAGIC > supplier, with dates for expected and actual delivery. Use this table to
+# MAGIC > analyze spend, delivery performance, and order volume trends.
+# MAGIC
+# MAGIC 3. Then add these **column descriptions**:
 # MAGIC
 # MAGIC | Column | Description |
 # MAGIC |--------|-------------|
+# MAGIC | `order_id` | Unique purchase order identifier (e.g. PO-00001) |
+# MAGIC | `product_id` | Foreign key to the products table |
+# MAGIC | `supplier_id` | Foreign key to the suppliers table |
 # MAGIC | `order_date` | Date the purchase order was placed |
 # MAGIC | `expected_delivery_date` | Date the supplier committed to deliver by |
 # MAGIC | `actual_delivery_date` | Date the order was actually received; NULL if not yet delivered |
@@ -621,7 +632,7 @@
 # MAGIC | `unit_cost` | Price per unit at time of order |
 # MAGIC | `status` | Order status: delivered, in_transit, delayed, or cancelled |
 # MAGIC
-# MAGIC 3. Add these **synonyms** (these map business terms to column names):
+# MAGIC 4. Add these **synonyms** (these map business terms to column names):
 # MAGIC
 # MAGIC | Business term | Maps to |
 # MAGIC |---------------|---------|
@@ -631,19 +642,8 @@
 # MAGIC | received date | `actual_delivery_date` |
 # MAGIC | order value | `quantity * unit_cost` |
 # MAGIC
-# MAGIC 4. Click on the **`inventory_snapshots`** table and add:
-# MAGIC
-# MAGIC | Column | Description |
-# MAGIC |--------|-------------|
-# MAGIC | `snapshot_date` | Date of the weekly inventory count |
-# MAGIC | `quantity_on_hand` | Current stock level in this warehouse |
-# MAGIC | `reorder_point` | Minimum stock threshold; below this triggers replenishment |
-# MAGIC | `quantity_on_order` | Units currently on order from suppliers |
-# MAGIC
-# MAGIC 5. Add a **synonym**: `stock level` → `quantity_on_hand`
-# MAGIC
-# MAGIC 6. **Save** the knowledge store
-# MAGIC 7. Re-ask: **"What's our current stock level for Circuit Board A1?"**
+# MAGIC 5. **Save** the knowledge store
+# MAGIC 6. Re-ask: **"What's our current stock level for Circuit Board A1?"**
 # MAGIC    — Genie should now correctly map "stock level" to `quantity_on_hand` and
 # MAGIC    "current" to the latest `snapshot_date`.
 
