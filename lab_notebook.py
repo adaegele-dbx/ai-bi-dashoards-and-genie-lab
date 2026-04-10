@@ -163,7 +163,7 @@
 # MAGIC - **4 KPI counters** across the top
 # MAGIC - **3 charts** for visual analysis
 # MAGIC - **1 table widget** showing top products
-# MAGIC - **A date filter** for interactive exploration
+# MAGIC - **A region filter** for interactive exploration
 # MAGIC
 # MAGIC > **Important:** All of the work in Part 2 happens in the **dashboard editor UI** —
 # MAGIC > not in this notebook.  The SQL queries are provided below for you to copy-paste
