@@ -203,7 +203,7 @@
 # MAGIC 5. Give the dataset a descriptive name (e.g., "Total Purchase Orders")
 # MAGIC
 # MAGIC **Add and configure the counter widget:**
-# MAGIC 1. Back on the canvas, click the **+** button to add a widget
+# MAGIC 1. Back on the canvas, click the **Add a visualization** button to add a widget
 # MAGIC 2. In the right-hand sidebar, select the dataset you just created from the **Dataset** dropdown
 # MAGIC 3. Under **Visualization type**, select **Counter**
 # MAGIC 4. In the **Value** dropdown, choose the column to display (details below for each KPI)
