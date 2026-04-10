@@ -7,7 +7,7 @@ A hands-on lab for learning how to build **AI/BI (Lakeview) dashboards** and **G
 By the end of this lab you will have:
 - **4 supply chain tables** in Unity Catalog — suppliers, products, purchase orders, and inventory snapshots
 - An **AI/BI dashboard** with KPI counters, charts, a data table, interactive filters, and cross-filtering
-- A **tuned Genie space** with a full knowledge store — descriptions, synonyms, joins, SQL expressions, instructions, and certified queries
+- A **tuned Genie space** with descriptions, synonyms, joins, SQL expressions, instructions, and SQL queries and functions
 - A **benchmark suite** of 10 evaluation questions with a feedback review workflow
 
 ## Prerequisites
@@ -54,7 +54,7 @@ ai-bi-dashboards-and-genie/
 | **Part 1** | Explore the data with guided SQL queries | ~3 min |
 | **Part 2** | Build an AI/BI dashboard with KPIs, charts, filters, and cross-filtering | ~18 min |
 | **Part 3** | Create a Genie space, ask questions, and try Agent mode | ~10 min |
-| **Part 4** | Tune with the knowledge store — descriptions, synonyms, joins, SQL expressions, instructions, and certified queries | ~14 min |
+| **Part 4** | Tune the Genie space — descriptions, synonyms, joins, SQL expressions, instructions, and SQL queries and functions | ~14 min |
 | **Part 5** | Benchmark, iterate, and use the feedback loop | ~8 min |
 
 **Total: ~56 minutes**

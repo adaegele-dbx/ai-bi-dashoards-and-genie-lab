@@ -17,7 +17,7 @@
 # MAGIC | **Part 1** | Explore the four tables with guided SQL queries |
 # MAGIC | **Part 2** | Build an **AI/BI (Lakeview) dashboard** with KPI counters, charts, filters, and **cross-filtering** |
 # MAGIC | **Part 3** | Create a **Genie space**, ask natural language questions, try **Agent mode**, and review generated SQL |
-# MAGIC | **Part 4** | Tune the Genie space with the **knowledge store**, **instructions**, **SQL expressions**, and **certified queries** |
+# MAGIC | **Part 4** | Tune the Genie space with **descriptions**, **instructions**, **SQL expressions**, and **SQL queries and functions** |
 # MAGIC | **Part 5** | Define **benchmark questions**, run them, iterate on tuning, and use the **feedback loop** |
 # MAGIC
 # MAGIC ---
@@ -582,18 +582,18 @@
 # MAGIC ## Part 4 — Tune the Genie Space
 # MAGIC
 # MAGIC Out-of-the-box Genie understands your table schemas but not your **business logic**.
-# MAGIC Tuning bridges this gap through the **knowledge store** — a collection of metadata,
-# MAGIC rules, and trusted SQL that teach Genie how your business works.
+# MAGIC Tuning bridges this gap through the Genie space **Settings** panel, where you
+# MAGIC configure metadata, rules, and trusted SQL that teach Genie how your business works.
 # MAGIC
-# MAGIC | Mechanism | What it does |
-# MAGIC |-----------|-------------|
-# MAGIC | **Table & column descriptions** | Human-readable context for each table and column |
-# MAGIC | **Synonyms** | Map business terms to actual column names |
-# MAGIC | **Join relationships** | Explicitly define how tables connect |
-# MAGIC | **SQL expressions** | Reusable measures, filters, and dimensions (the semantic layer) |
-# MAGIC | **General instructions** | Business rules and definitions |
-# MAGIC | **Sample questions** | Curated examples that appear as suggestions |
-# MAGIC | **Certified SQL queries** | Trusted, pre-written SQL for critical metrics |
+# MAGIC | Mechanism | Where to find it | What it does |
+# MAGIC |-----------|-----------------|-------------|
+# MAGIC | **Table & column descriptions** | Settings → Tables | Human-readable context for each table and column |
+# MAGIC | **Synonyms** | Settings → Tables (per column) | Map business terms to actual column names |
+# MAGIC | **Join relationships** | Settings → Tables | Explicitly define how tables connect |
+# MAGIC | **SQL expressions** | Settings → SQL expressions | Reusable measures, filters, and dimensions (the semantic layer) |
+# MAGIC | **General instructions** | Settings → Instructions | Business rules and definitions |
+# MAGIC | **Common questions** | Settings → Common questions | Curated examples that appear as suggestions |
+# MAGIC | **SQL queries and functions** | Settings → SQL queries and functions | Trusted, pre-written SQL for critical metrics |
 # MAGIC
 # MAGIC > If you get stuck on what to add, check `solutions/genie_instructions.md` for
 # MAGIC > reference content.
@@ -609,8 +609,8 @@
 # MAGIC tables — but we intentionally left **`purchase_orders`** undescribed so you
 # MAGIC can practice adding them yourself.
 # MAGIC
-# MAGIC 1. In your Genie space, open the **knowledge store** (click the book icon or
-# MAGIC    go to Settings → Knowledge store)
+# MAGIC 1. In your Genie space, open **Settings** (gear icon) and go to the **Tables**
+# MAGIC    section
 # MAGIC 2. Click on the **`purchase_orders`** table and add a **table description**:
 # MAGIC
 # MAGIC > Six months of purchase orders (Oct 2024 – Mar 2025) tracking the full order
@@ -642,10 +642,10 @@
 # MAGIC | received date | `actual_delivery_date` |
 # MAGIC | order value | `quantity * unit_cost` |
 # MAGIC
-# MAGIC 5. **Save** the knowledge store
-# MAGIC 6. Re-ask: **"What's our current stock level for Circuit Board A1?"**
-# MAGIC    — Genie should now correctly map "stock level" to `quantity_on_hand` and
-# MAGIC    "current" to the latest `snapshot_date`.
+# MAGIC 5. **Save** the changes
+# MAGIC 6. Re-ask: **"What is the total order value for orders with an ETA in January 2025?"**
+# MAGIC    — Genie should now correctly map "order value" to `quantity * unit_cost` and
+# MAGIC    "ETA" to `expected_delivery_date`.
 
 # COMMAND ----------
 
@@ -656,15 +656,15 @@
 # MAGIC join relationships** eliminates guesswork — especially when column names don't
 # MAGIC match across tables or when there are multiple possible join paths.
 # MAGIC
-# MAGIC 1. In the knowledge store, find the **Join relationships** section
+# MAGIC 1. In **Settings → Tables**, find the **Join relationships** section
 # MAGIC 2. Add the following relationships:
 # MAGIC
-# MAGIC | Left table | Right table | Join condition |
-# MAGIC |-----------|------------|----------------|
-# MAGIC | `purchase_orders` | `suppliers` | `purchase_orders.supplier_id = suppliers.supplier_id` |
-# MAGIC | `purchase_orders` | `products` | `purchase_orders.product_id = products.product_id` |
-# MAGIC | `inventory_snapshots` | `products` | `inventory_snapshots.product_id = products.product_id` |
-# MAGIC | `products` | `suppliers` | `products.supplier_id = suppliers.supplier_id` |
+# MAGIC | Left table | Right table | Join type | Join condition |
+# MAGIC |-----------|------------|-----------|----------------|
+# MAGIC | `purchase_orders` | `suppliers` | Inner | `purchase_orders.supplier_id = suppliers.supplier_id` |
+# MAGIC | `purchase_orders` | `products` | Inner | `purchase_orders.product_id = products.product_id` |
+# MAGIC | `inventory_snapshots` | `products` | Inner | `inventory_snapshots.product_id = products.product_id` |
+# MAGIC | `products` | `suppliers` | Inner | `products.supplier_id = suppliers.supplier_id` |
 # MAGIC
 # MAGIC 3. **Save** the changes
 # MAGIC
@@ -682,7 +682,7 @@
 # MAGIC dimensions that capture your business definitions once and let Genie use them
 # MAGIC everywhere.  Think of them as the **semantic layer** for your Genie space.
 # MAGIC
-# MAGIC 1. In the knowledge store, find the **SQL expressions** section
+# MAGIC 1. In **Settings**, go to the **SQL expressions** section
 # MAGIC 2. Add the following expressions:
 # MAGIC
 # MAGIC ---
@@ -690,24 +690,26 @@
 # MAGIC **Expression 1 — Measure: `total_spend`**
 # MAGIC - **Type:** Measure
 # MAGIC - **Expression:** `SUM(purchase_orders.quantity * purchase_orders.unit_cost)`
-# MAGIC - **Description:** Total spend across purchase orders, excluding cancelled orders
-# MAGIC - **Filters:** `purchase_orders.status != 'cancelled'`
+# MAGIC - **Synonyms:** spend, total cost
+# MAGIC - **Instructions:** Exclude cancelled orders when calculating total spend
 # MAGIC
 # MAGIC **Expression 2 — Measure: `on_time_delivery_rate`**
 # MAGIC - **Type:** Measure
 # MAGIC - **Expression:** `COUNT(CASE WHEN purchase_orders.actual_delivery_date <= purchase_orders.expected_delivery_date THEN 1 END) * 100.0 / NULLIF(COUNT(purchase_orders.actual_delivery_date), 0)`
-# MAGIC - **Description:** Percentage of delivered orders that arrived on or before the expected date
-# MAGIC - **Filters:** `purchase_orders.actual_delivery_date IS NOT NULL`
+# MAGIC - **Synonyms:** on-time rate, OTD rate, delivery performance
+# MAGIC - **Instructions:** Only include orders where actual_delivery_date is not null
 # MAGIC
 # MAGIC **Expression 3 — Filter: `latest_snapshot`**
 # MAGIC - **Type:** Filter
 # MAGIC - **Expression:** `inventory_snapshots.snapshot_date = (SELECT MAX(snapshot_date) FROM workspace.ai_bi_lab.inventory_snapshots)`
-# MAGIC - **Description:** Restricts inventory queries to the most recent weekly snapshot
+# MAGIC - **Synonyms:** current inventory, latest inventory
+# MAGIC - **Instructions:** Use this filter when the user asks about "current" or "latest" inventory levels
 # MAGIC
 # MAGIC **Expression 4 — Filter: `low_stock`**
 # MAGIC - **Type:** Filter
 # MAGIC - **Expression:** `inventory_snapshots.quantity_on_hand < inventory_snapshots.reorder_point`
-# MAGIC - **Description:** Items below their reorder threshold
+# MAGIC - **Synonyms:** at-risk items, below reorder point
+# MAGIC - **Instructions:** Use this filter when the user asks about low-stock or at-risk inventory items
 # MAGIC
 # MAGIC ---
 # MAGIC
@@ -725,146 +727,114 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### 4d. Add general instructions
+# MAGIC ### 4d. Add SQL queries and functions
 # MAGIC
-# MAGIC 1. In your Genie space, click the **gear icon** (Settings) in the top-right
-# MAGIC 2. Find the **General instructions** section
-# MAGIC 3. Add the following business context (paste each as a separate instruction):
+# MAGIC SQL queries and functions are the most powerful tuning tool.  They're pre-written,
+# MAGIC **trusted** SQL that Genie will use instead of generating its own when a user
+# MAGIC asks a related question.
 # MAGIC
-# MAGIC ---
-# MAGIC
-# MAGIC **Instruction 1 — On-time delivery definition:**
-# MAGIC > On-time delivery means actual_delivery_date <= expected_delivery_date.
-# MAGIC > Orders where actual_delivery_date IS NULL should not be included in on-time
-# MAGIC > calculations.
-# MAGIC
-# MAGIC **Instruction 2 — Spend calculation:**
-# MAGIC > Spend or total spend is calculated as quantity * unit_cost. Exclude cancelled
-# MAGIC > orders from spend calculations unless explicitly asked.
-# MAGIC
-# MAGIC **Instruction 3 — Current inventory:**
-# MAGIC > When asked about "current" inventory, use the most recent snapshot_date in the
-# MAGIC > inventory_snapshots table.
-# MAGIC
-# MAGIC **Instruction 4 — Lead time:**
-# MAGIC > Lead time is measured in calendar days. For actual lead time, use
-# MAGIC > DATEDIFF(actual_delivery_date, order_date). For expected lead time, use the
-# MAGIC > lead_time_days column from the suppliers table.
-# MAGIC
-# MAGIC **Instruction 5 — Low-stock definition:**
-# MAGIC > A "low-stock" or "at-risk" item is one where quantity_on_hand < reorder_point
-# MAGIC > in the latest inventory snapshot.
-# MAGIC
-# MAGIC **Instruction 6 — Best suppliers:**
-# MAGIC > "Best" or "top" suppliers should be ranked by a combination of on-time delivery
-# MAGIC > rate and reliability_rating, unless the user specifies a different metric.
+# MAGIC 1. In the Genie space settings, find the **SQL queries and functions** section
+# MAGIC 2. Add the following two queries:
 # MAGIC
 # MAGIC ---
 # MAGIC
-# MAGIC 4. **Save** the instructions
-# MAGIC 5. Now re-ask **Question 2** from Part 3:
-# MAGIC    > What is our on-time delivery rate?
+# MAGIC #### Query 1: Total spend by supplier region
 # MAGIC
-# MAGIC    Compare the SQL Genie generates now versus before.  Does it correctly exclude
-# MAGIC    NULL delivery dates and compare `actual_delivery_date <= expected_delivery_date`?
+# MAGIC **Question:** What is the total spend by supplier region?
+# MAGIC
+# MAGIC ```sql
+# MAGIC SELECT s.region,
+# MAGIC        ROUND(SUM(po.quantity * po.unit_cost), 2) AS total_spend
+# MAGIC FROM workspace.ai_bi_lab.purchase_orders po
+# MAGIC JOIN workspace.ai_bi_lab.suppliers s ON po.supplier_id = s.supplier_id
+# MAGIC WHERE po.status != 'cancelled'
+# MAGIC GROUP BY s.region
+# MAGIC ORDER BY total_spend DESC
+# MAGIC ```
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC #### Query 2: Monthly order counts by status
+# MAGIC
+# MAGIC **Question:** How many orders do we have each month by status?
+# MAGIC
+# MAGIC ```sql
+# MAGIC SELECT DATE_TRUNC('month', order_date) AS order_month,
+# MAGIC        status,
+# MAGIC        COUNT(*) AS order_count
+# MAGIC FROM workspace.ai_bi_lab.purchase_orders
+# MAGIC GROUP BY order_month, status
+# MAGIC ORDER BY order_month, status
+# MAGIC ```
+# MAGIC
+# MAGIC ---
+# MAGIC
+# MAGIC 3. **Save** the queries
+# MAGIC 4. Now test them — ask Genie:
+# MAGIC    > What is the total spend by region?
+# MAGIC
+# MAGIC    And:
+# MAGIC    > Show me monthly order counts by status
+# MAGIC
+# MAGIC    Genie should use your saved queries directly.  Check the SQL tab to confirm.
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### 4e. Add sample questions
+# MAGIC ### 4e. Add general instructions
 # MAGIC
-# MAGIC Sample questions serve two purposes:
+# MAGIC General instructions provide qualitative business context that doesn't fit into
+# MAGIC SQL expressions, descriptions, or SQL queries and functions.  Use them for things like
+# MAGIC abbreviations, formatting preferences, business processes, and domain terminology.
+# MAGIC
+# MAGIC 1. In your Genie space, click the **gear icon** (Settings) in the top-right
+# MAGIC 2. Find the **General instructions** section
+# MAGIC 3. Paste the following as a hyphen-separated list:
+# MAGIC
+# MAGIC > - The four order statuses are: in_transit, delayed, delivered, and cancelled. The typical lifecycle is in_transit → delivered, but orders can be marked as delayed or cancelled at any point.
+# MAGIC > - "PO" is short for purchase order. "OTD" stands for on-time delivery. "MOQ" means minimum order quantity.
+# MAGIC > - When displaying monetary values, round to 2 decimal places and use USD.
+# MAGIC > - When displaying percentages, round to 1 decimal place.
+# MAGIC > - Supplier regions are: North America, Europe, Asia-Pacific, South America, and Africa.
+# MAGIC > - Product categories are: Electronics Components, Raw Materials, and Packaging.
+# MAGIC > - The four warehouses are Chicago, Atlanta, Seattle, and Dallas. When asked about warehouse performance, include all four.
+# MAGIC > - When asked about trends over time, group by month using DATE_TRUNC('month', order_date) unless a different granularity is specified.
+# MAGIC > - "Best" or "top" suppliers should be ranked by on-time delivery rate and reliability_rating, unless the user specifies a different metric.
+# MAGIC
+# MAGIC 4. **Save** the instructions
+# MAGIC 5. Now ask Genie: **"What does OTD stand for and what's our current rate?"**
+# MAGIC
+# MAGIC    Genie should recognize the abbreviation from the instructions and calculate
+# MAGIC    the on-time delivery rate using the SQL expression defined in step 4c.
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### 4f. Add common questions
+# MAGIC
+# MAGIC Common questions serve two purposes:
 # MAGIC - They appear as **suggestions** when users open the Genie space (better onboarding)
 # MAGIC - They help Genie **learn question patterns** for your domain
 # MAGIC
-# MAGIC 1. In the Genie space settings, find the **Sample questions** section
+# MAGIC 1. In the Genie space settings, find the **Common questions** section
 # MAGIC 2. Add the following questions:
 # MAGIC
-# MAGIC | # | Sample question |
+# MAGIC | # | Common question |
 # MAGIC |---|----------------|
 # MAGIC | 1 | What is our overall on-time delivery rate? |
 # MAGIC | 2 | Which supplier region has the highest total spend? |
 # MAGIC | 3 | Show me products that are currently below their reorder point |
 # MAGIC | 4 | What are the monthly spend trends by product category? |
 # MAGIC | 5 | Which suppliers have the worst delivery performance? |
+# MAGIC | 6 | Why did our spend increase in November and December compared to October? Break down the drivers by region and category. |
+# MAGIC
+# MAGIC Question 6 is a good example of a question that triggers **Agent mode** —
+# MAGIC Genie's multi-step reasoning capability.  Instead of writing a single query,
+# MAGIC Genie will run multiple queries, stream its thinking, and synthesize the
+# MAGIC findings into a narrative answer.  Including it as a common question shows
+# MAGIC users that the space supports this kind of exploratory analysis.
 # MAGIC
 # MAGIC 3. **Save** the changes
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ### 4f. Add certified SQL queries
-# MAGIC
-# MAGIC Certified queries are the most powerful tuning tool.  They're pre-written,
-# MAGIC **trusted** SQL that Genie will use instead of generating its own when a user
-# MAGIC asks a related question.
-# MAGIC
-# MAGIC 1. In the Genie space settings, find the **Certified queries** section (or
-# MAGIC    "Trusted SQL queries" depending on your workspace version)
-# MAGIC 2. Add the following two certified queries:
-# MAGIC
-# MAGIC ---
-# MAGIC
-# MAGIC #### Certified Query 1: Supplier Scorecard
-# MAGIC
-# MAGIC **Question:** Show me a supplier scorecard with reliability and delivery metrics
-# MAGIC
-# MAGIC ```sql
-# MAGIC SELECT
-# MAGIC   s.supplier_name,
-# MAGIC   s.region,
-# MAGIC   s.reliability_rating,
-# MAGIC   s.lead_time_days AS expected_lead_time,
-# MAGIC   COUNT(po.order_id) AS total_orders,
-# MAGIC   ROUND(AVG(CASE WHEN po.actual_delivery_date IS NOT NULL
-# MAGIC     THEN DATEDIFF(po.actual_delivery_date, po.order_date) END), 1) AS avg_actual_lead_time,
-# MAGIC   ROUND(
-# MAGIC     COUNT(CASE WHEN po.actual_delivery_date <= po.expected_delivery_date THEN 1 END) * 100.0
-# MAGIC     / NULLIF(COUNT(po.actual_delivery_date), 0), 1
-# MAGIC   ) AS on_time_pct,
-# MAGIC   ROUND(SUM(CASE WHEN po.status != 'cancelled' THEN po.quantity * po.unit_cost ELSE 0 END), 2) AS total_spend
-# MAGIC FROM workspace.ai_bi_lab.suppliers s
-# MAGIC LEFT JOIN workspace.ai_bi_lab.purchase_orders po ON s.supplier_id = po.supplier_id
-# MAGIC GROUP BY s.supplier_name, s.region, s.reliability_rating, s.lead_time_days
-# MAGIC ORDER BY on_time_pct DESC
-# MAGIC ```
-# MAGIC
-# MAGIC ---
-# MAGIC
-# MAGIC #### Certified Query 2: Inventory Risk Report
-# MAGIC
-# MAGIC **Question:** Which products are at risk of stockout?
-# MAGIC
-# MAGIC ```sql
-# MAGIC SELECT
-# MAGIC   p.product_name,
-# MAGIC   p.category,
-# MAGIC   i.warehouse,
-# MAGIC   i.quantity_on_hand,
-# MAGIC   i.reorder_point,
-# MAGIC   i.reorder_point - i.quantity_on_hand AS units_below_threshold,
-# MAGIC   i.quantity_on_order,
-# MAGIC   CASE
-# MAGIC     WHEN i.quantity_on_order > 0 THEN 'Replenishment Ordered'
-# MAGIC     ELSE 'Action Required'
-# MAGIC   END AS risk_status
-# MAGIC FROM workspace.ai_bi_lab.inventory_snapshots i
-# MAGIC JOIN workspace.ai_bi_lab.products p ON i.product_id = p.product_id
-# MAGIC WHERE i.snapshot_date = (SELECT MAX(snapshot_date) FROM workspace.ai_bi_lab.inventory_snapshots)
-# MAGIC   AND i.quantity_on_hand < i.reorder_point
-# MAGIC ORDER BY units_below_threshold DESC
-# MAGIC ```
-# MAGIC
-# MAGIC ---
-# MAGIC
-# MAGIC 3. **Save** the certified queries
-# MAGIC 4. Now test them — ask Genie:
-# MAGIC    > Show me a supplier scorecard
-# MAGIC
-# MAGIC    And:
-# MAGIC    > Which products are at risk of stockout?
-# MAGIC
-# MAGIC    Genie should use your certified queries directly.  Check the SQL tab to confirm.
 
 # COMMAND ----------
 
@@ -886,7 +856,7 @@
 # MAGIC %md
 # MAGIC ### 5a. Define benchmark questions
 # MAGIC
-# MAGIC Here are 10 benchmark questions that span different query patterns.  For each,
+# MAGIC Here are 5 benchmark questions that span different query patterns.  For each,
 # MAGIC the "Expected Behavior" column describes what correct SQL should look like.
 # MAGIC
 # MAGIC | # | Question | Category | Expected Behavior |
@@ -896,11 +866,6 @@
 # MAGIC | 3 | Which warehouse has the most low-stock items? | Join | Join `inventory_snapshots` to `products`, filter latest date, count where qty < reorder, group by warehouse |
 # MAGIC | 4 | How has spend changed month over month? | Time-based | Monthly spend trend using `DATE_TRUNC`, exclude cancelled |
 # MAGIC | 5 | Who are our best suppliers? | Ambiguous | Should use on-time rate + reliability per instructions |
-# MAGIC | 6 | What percentage of orders are delayed? | Calculation | Count `status = 'delayed'` / total count |
-# MAGIC | 7 | Compare Electronics Components vs Raw Materials spend | Comparison | Group by category, sum `quantity * unit_cost`, exclude cancelled |
-# MAGIC | 8 | Which products have never been below reorder point? | Negation | Products NOT in low-stock snapshots (tricky query) |
-# MAGIC | 9 | Show me supplier performance for Q1 2025 | Time-filtered | Filter Jan–Mar 2025, show supplier delivery metrics |
-# MAGIC | 10 | What is the total quantity on order across all warehouses? | Aggregation | Sum `quantity_on_order` from latest snapshot |
 
 # COMMAND ----------
 
@@ -931,11 +896,11 @@
 # MAGIC
 # MAGIC 1. **Identify patterns in failures:**
 # MAGIC    - Did Genie miss the same business rule multiple times? → Add or refine an instruction
-# MAGIC    - Did a complex query type consistently fail? → Add a certified query for it
+# MAGIC    - Did a complex query type consistently fail? → Add a SQL query or function for it
 # MAGIC    - Did Genie misinterpret a term? → Add a definition to instructions
 # MAGIC
 # MAGIC 2. **Make targeted improvements:**
-# MAGIC    - Go back to Settings and add/edit instructions or certified queries
+# MAGIC    - Go back to Settings and add/edit instructions or SQL queries and functions
 # MAGIC    - Be specific — vague instructions don't help
 # MAGIC
 # MAGIC 3. **Re-run the failed questions:**
@@ -976,7 +941,7 @@
 # MAGIC   - Use **Re-run query** to execute the query with your credentials (useful for
 # MAGIC     debugging permission issues vs. logic issues)
 # MAGIC   - Decide the right fix: add an instruction, refine a SQL expression, or add a
-# MAGIC     certified query
+# MAGIC     SQL query or function
 # MAGIC
 # MAGIC **3. Close the loop:**
 # MAGIC - After making improvements, mark the feedback as **reviewed**
@@ -984,7 +949,7 @@
 # MAGIC
 # MAGIC > **Production workflow:** In a real deployment, this feedback loop runs continuously.
 # MAGIC > Space managers review feedback weekly, prioritize the most common failure patterns,
-# MAGIC > and incrementally improve the knowledge store.  Over time, this drives accuracy
+# MAGIC > and incrementally improve the space settings.  Over time, this drives accuracy
 # MAGIC > from an initial ~60-70% to 80%+ (the recommended threshold for user acceptance
 # MAGIC > testing).
 
@@ -1000,7 +965,7 @@
 # MAGIC |-------|-------------|
 # MAGIC | **4 supply chain tables** | Suppliers, products, purchase orders, and inventory snapshots in Unity Catalog |
 # MAGIC | **AI/BI dashboard** | KPI counters, charts, a table widget, date filters, and cross-filtering — all built through the UI |
-# MAGIC | **Tuned Genie space** | Knowledge store with descriptions, synonyms, joins, SQL expressions, instructions, sample questions, and certified queries |
+# MAGIC | **Tuned Genie space** | Descriptions, synonyms, joins, SQL expressions, instructions, common questions, and SQL queries and functions configured through space settings |
 # MAGIC | **Benchmark suite** | 10 questions with expected behavior, scoring, and a feedback review workflow |
 # MAGIC
 # MAGIC ### Next steps
@@ -1009,7 +974,7 @@
 # MAGIC   automatically on new data
 # MAGIC - **Share the Genie space** — Invite team members and see what questions they ask
 # MAGIC - **Monitor Genie conversations** — Review the conversation history to find new question
-# MAGIC   patterns and add more certified queries
+# MAGIC   patterns and add more SQL queries and functions
 # MAGIC - **Set up alerts** — Connect dashboard widgets to alerts for threshold-based notifications
 # MAGIC   (e.g., alert when low-stock count exceeds 10)
 # MAGIC - **Version-control dashboards** — Export dashboard JSON and manage it in a Databricks

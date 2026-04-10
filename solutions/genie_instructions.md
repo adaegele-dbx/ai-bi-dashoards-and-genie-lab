@@ -73,58 +73,38 @@ These are the business context instructions to add to the Genie space settings:
 - Product categories are: Electronics Components, Raw Materials, and Packaging.
 - Supplier regions are: North America, Europe, Asia-Pacific, South America, and Africa.
 
-## Sample Questions
+## Common Questions
 
-These are curated sample questions to add to the Genie space:
+These are curated common questions to add to the Genie space:
 
 1. What is our overall on-time delivery rate?
 2. Which supplier region has the highest total spend?
 3. Show me products that are currently below their reorder point
 4. What are the monthly spend trends by product category?
 5. Which suppliers have the worst delivery performance?
+6. Why did our spend increase in November and December compared to October? Break down the drivers by region and category.
 
-## Certified SQL Queries
+## SQL Queries and Functions
 
-### Supplier Scorecard
+### Total spend by supplier region
 ```sql
-SELECT 
-  s.supplier_name,
-  s.region,
-  s.reliability_rating,
-  s.lead_time_days AS expected_lead_time,
-  COUNT(po.order_id) AS total_orders,
-  ROUND(AVG(CASE WHEN po.actual_delivery_date IS NOT NULL 
-    THEN DATEDIFF(po.actual_delivery_date, po.order_date) END), 1) AS avg_actual_lead_time,
-  ROUND(
-    COUNT(CASE WHEN po.actual_delivery_date <= po.expected_delivery_date THEN 1 END) * 100.0 
-    / NULLIF(COUNT(po.actual_delivery_date), 0), 1
-  ) AS on_time_pct,
-  ROUND(SUM(CASE WHEN po.status != 'cancelled' THEN po.quantity * po.unit_cost ELSE 0 END), 2) AS total_spend
-FROM workspace.ai_bi_lab.suppliers s
-LEFT JOIN workspace.ai_bi_lab.purchase_orders po ON s.supplier_id = po.supplier_id
-GROUP BY s.supplier_name, s.region, s.reliability_rating, s.lead_time_days
-ORDER BY on_time_pct DESC
+SELECT s.region,
+       ROUND(SUM(po.quantity * po.unit_cost), 2) AS total_spend
+FROM workspace.ai_bi_lab.purchase_orders po
+JOIN workspace.ai_bi_lab.suppliers s ON po.supplier_id = s.supplier_id
+WHERE po.status != 'cancelled'
+GROUP BY s.region
+ORDER BY total_spend DESC
 ```
 
-### Inventory Risk Report
+### Monthly order counts by status
 ```sql
-SELECT 
-  p.product_name,
-  p.category,
-  i.warehouse,
-  i.quantity_on_hand,
-  i.reorder_point,
-  i.reorder_point - i.quantity_on_hand AS units_below_threshold,
-  i.quantity_on_order,
-  CASE 
-    WHEN i.quantity_on_order > 0 THEN 'Replenishment Ordered'
-    ELSE 'Action Required'
-  END AS risk_status
-FROM workspace.ai_bi_lab.inventory_snapshots i
-JOIN workspace.ai_bi_lab.products p ON i.product_id = p.product_id
-WHERE i.snapshot_date = (SELECT MAX(snapshot_date) FROM workspace.ai_bi_lab.inventory_snapshots)
-  AND i.quantity_on_hand < i.reorder_point
-ORDER BY units_below_threshold DESC
+SELECT DATE_TRUNC('month', order_date) AS order_month,
+       status,
+       COUNT(*) AS order_count
+FROM workspace.ai_bi_lab.purchase_orders
+GROUP BY order_month, status
+ORDER BY order_month, status
 ```
 
 ## Benchmark Questions
@@ -138,8 +118,3 @@ A table with columns: Question, Category, Expected Behavior
 | Which warehouse has the most low-stock items? | Join | Should join inventory_snapshots with products, filter latest date, count where qty < reorder |
 | How has spend changed month over month? | Time-based | Should show monthly spend trend with DATE_TRUNC |
 | Who are our best suppliers? | Ambiguous | Should use on-time rate + reliability_rating per instructions |
-| What percentage of orders are delayed? | Calculation | Should count delayed status / total orders |
-| Compare Electronics Components vs Raw Materials spend | Comparison | Should group by category, sum spend |
-| Which products have never been below reorder point? | Negation | Should find products NOT in low-stock snapshots |
-| Show me supplier performance for Q1 2025 | Time-filtered | Should filter Jan-Mar 2025, show supplier metrics |
-| What is the total quantity on order across all warehouses? | Aggregation | Should sum quantity_on_order from latest snapshot |
