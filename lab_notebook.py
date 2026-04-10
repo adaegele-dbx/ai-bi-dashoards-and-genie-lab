@@ -161,7 +161,7 @@
 # MAGIC Databricks AI/BI dashboard editor.  The dashboard will have:
 # MAGIC
 # MAGIC - **4 KPI counters** across the top
-# MAGIC - **4 charts** for visual analysis
+# MAGIC - **3 charts** for visual analysis
 # MAGIC - **1 table widget** showing top products
 # MAGIC - **A date filter** for interactive exploration
 # MAGIC
@@ -280,7 +280,7 @@
 # MAGIC %md
 # MAGIC ### 2c. Add chart widgets
 # MAGIC
-# MAGIC Now add four charts below the KPI row.  Same process — create a dataset with the
+# MAGIC Now add three charts below the KPI row.  Same process — create a dataset with the
 # MAGIC SQL query, then add the visualization.
 # MAGIC
 # MAGIC ---
@@ -337,25 +337,6 @@
 # MAGIC - **Y-axis:** `avg_days_variance`
 # MAGIC - **Note:** Negative values = early delivery, positive = late.  This chart quickly
 # MAGIC   reveals which suppliers consistently miss or beat their expected delivery dates.
-# MAGIC
-# MAGIC ---
-# MAGIC
-# MAGIC #### Chart 4: Inventory Levels vs. Reorder Points
-# MAGIC
-# MAGIC ```sql
-# MAGIC SELECT p.product_name, i.warehouse, i.quantity_on_hand, i.reorder_point
-# MAGIC FROM workspace.ai_bi_lab.inventory_snapshots i
-# MAGIC JOIN workspace.ai_bi_lab.products p ON i.product_id = p.product_id
-# MAGIC WHERE i.snapshot_date = (SELECT MAX(snapshot_date) FROM workspace.ai_bi_lab.inventory_snapshots)
-# MAGIC ORDER BY i.quantity_on_hand ASC
-# MAGIC LIMIT 15
-# MAGIC ```
-# MAGIC
-# MAGIC - **Visualization type:** Bar chart
-# MAGIC - **X-axis:** `product_name`
-# MAGIC - **Y-axis:** Both `quantity_on_hand` and `reorder_point` (grouped bars)
-# MAGIC - **Tip:** Adding both measures as Y-axis values creates a grouped bar chart so you
-# MAGIC   can visually compare current stock against the reorder threshold.
 
 # COMMAND ----------
 
@@ -391,13 +372,13 @@
 # MAGIC
 # MAGIC 1. **Top row:** Place the 4 KPI counters side by side
 # MAGIC 2. **Second row:** "Spend by Supplier Region" and "Orders Over Time" side by side
-# MAGIC 3. **Third row:** "Delivery Performance by Supplier" and "Inventory Levels vs. Reorder Points"
+# MAGIC 3. **Third row:** "Delivery Performance by Supplier" (full width)
 # MAGIC 4. **Bottom:** "Top 10 Products by Spend" table (full width)
 # MAGIC
 # MAGIC **Add section headers:**
 # MAGIC - Add a **Text** widget above the KPIs: "Key Metrics"
 # MAGIC - Add a **Text** widget above the second row: "Spend & Order Analysis"
-# MAGIC - Add a **Text** widget above the third row: "Delivery & Inventory Health"
+# MAGIC - Add a **Text** widget above the third row: "Delivery Performance"
 # MAGIC
 # MAGIC **Add a date filter:**
 # MAGIC 1. Click **Add a filter** at the top of the canvas

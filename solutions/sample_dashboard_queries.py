@@ -103,21 +103,6 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Inventory Levels vs Reorder Points (Grouped Bar Chart)
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC SELECT p.product_name, i.warehouse, i.quantity_on_hand, i.reorder_point
-# MAGIC FROM workspace.ai_bi_lab.inventory_snapshots i
-# MAGIC JOIN workspace.ai_bi_lab.products p ON i.product_id = p.product_id
-# MAGIC WHERE i.snapshot_date = (SELECT MAX(snapshot_date) FROM workspace.ai_bi_lab.inventory_snapshots)
-# MAGIC ORDER BY i.quantity_on_hand ASC
-# MAGIC LIMIT 15
-
-# COMMAND ----------
-
-# MAGIC %md
 # MAGIC ## Top 10 Products by Spend (Table)
 
 # COMMAND ----------
