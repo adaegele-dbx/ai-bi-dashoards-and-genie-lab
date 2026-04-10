@@ -345,6 +345,12 @@
 # MAGIC
 # MAGIC #### Top 10 Products by Spend
 # MAGIC
+# MAGIC **Step 1 — Create the dataset:**
+# MAGIC
+# MAGIC 1. Click the **Data** tab in the right-hand sidebar
+# MAGIC 2. Click **Add SQL dataset**
+# MAGIC 3. Paste the following query into the query editor:
+# MAGIC
 # MAGIC ```sql
 # MAGIC SELECT p.product_name, p.category, s.supplier_name,
 # MAGIC        SUM(po.quantity) AS total_quantity,
@@ -358,10 +364,30 @@
 # MAGIC LIMIT 10
 # MAGIC ```
 # MAGIC
-# MAGIC - **Visualization type:** Table
-# MAGIC - **Formatting tips:**
-# MAGIC   - Format `total_spend` as currency
-# MAGIC   - Format `total_quantity` with a thousands separator
+# MAGIC 4. Click **Run** to verify the query returns results
+# MAGIC 5. Name the dataset "Top 10 Products by Spend"
+# MAGIC
+# MAGIC **Step 2 — Use the AI assistant to create the widget:**
+# MAGIC
+# MAGIC Instead of manually configuring this widget, let's try the dashboard authoring
+# MAGIC assistant.  Click the **AI assistant** icon (sparkle icon) at the top of the canvas
+# MAGIC and type a prompt like:
+# MAGIC
+# MAGIC > Create a table widget using the "Top 10 Products by Spend" dataset.
+# MAGIC > Format total_spend as currency and total_quantity with a thousands separator.
+# MAGIC
+# MAGIC Review what the assistant generates — it should produce a table widget with the
+# MAGIC formatting applied.
+# MAGIC
+# MAGIC **Fallback — configure manually if needed:**
+# MAGIC
+# MAGIC If the assistant doesn't get it right, you can configure the widget yourself:
+# MAGIC 1. Click the **+** button on the canvas to add a widget
+# MAGIC 2. In the right-hand sidebar, select the "Top 10 Products by Spend" dataset from
+# MAGIC    the **Dataset** dropdown
+# MAGIC 3. Under **Visualization type**, select **Table**
+# MAGIC 4. Format `total_spend` as currency
+# MAGIC 5. Format `total_quantity` with a thousands separator
 
 # COMMAND ----------
 
