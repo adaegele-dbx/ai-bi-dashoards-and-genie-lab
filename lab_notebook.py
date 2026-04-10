@@ -427,32 +427,30 @@
 # MAGIC **Publish:**
 # MAGIC - Click **Publish** in the top-right corner to make the dashboard available for sharing
 # MAGIC
-# MAGIC ### 2f. Explore cross-filtering
+# MAGIC ### 2f. Try the global filter and understand cross-filtering
 # MAGIC
-# MAGIC AI/BI dashboards support **cross-filtering** — clicking an element in one chart
-# MAGIC automatically filters other widgets that share a column with the same name.  No
-# MAGIC configuration is needed; it works out of the box for bar charts, pie charts,
-# MAGIC heatmaps, and scatter plots.
+# MAGIC **Try the global region filter:**
 # MAGIC
-# MAGIC Because every dataset in this dashboard includes a `region` column, clicking a
-# MAGIC region in one chart will filter all the other widgets.  Try it now:
+# MAGIC 1. Use the **Region** filter at the top of the dashboard to select one or more
+# MAGIC    regions (e.g., select "Asia-Pacific")
+# MAGIC 2. Observe how **every widget** updates — KPI counters, charts, and the table all
+# MAGIC    filter to show only data for the selected region(s)
+# MAGIC 3. Clear the filter and try selecting multiple regions to compare
 # MAGIC
-# MAGIC 1. Click on a **single bar** in the "Spend by Supplier Region" chart (e.g., click
-# MAGIC    the "Asia-Pacific" bar)
-# MAGIC 2. Observe how the other widgets on the dashboard update — the KPI counters,
-# MAGIC    "Orders Over Time" chart, "Delivery Performance" chart, and the "Top 10
-# MAGIC    Products" table should all filter to show only data for that region
-# MAGIC 3. Click the bar again (or click the **X** on the filter pill) to clear the filter
-# MAGIC 4. Try clicking a segment in the "Orders Over Time" chart — for example, click on
-# MAGIC    the "delayed" line for a specific month
+# MAGIC This works because every dataset includes a `region` column, and the global filter
+# MAGIC is explicitly bound to that column across all datasets.  This is the primary way
+# MAGIC users will interactively explore the dashboard.
 # MAGIC
-# MAGIC > **Why this matters:** Cross-filtering turns a static dashboard into an interactive
-# MAGIC > exploration tool.  Business users can drill into specific regions, time periods,
-# MAGIC > or statuses without needing to write SQL — they just click.
+# MAGIC > **A note on cross-filtering:** AI/BI dashboards also support **cross-filtering** —
+# MAGIC > clicking an element in one chart (e.g., a bar or slice) automatically filters
+# MAGIC > other widgets.  However, cross-filtering only works between widgets that share
+# MAGIC > the **same dataset**.  In our dashboard, each widget has its own dataset, so
+# MAGIC > clicking a bar in "Spend by Supplier Region" won't filter the other widgets.
 # MAGIC >
-# MAGIC > This works because all datasets include the `region` column.  When you click a
-# MAGIC > region in "Spend by Supplier Region", the dashboard matches on `region` across
-# MAGIC > every other widget's dataset and filters them automatically.
+# MAGIC > If you wanted cross-filtering to work, you would need multiple widgets to
+# MAGIC > reference a single shared dataset.  For example, if two charts both pointed to
+# MAGIC > the same dataset, clicking a value in one would filter the other.  This is a
+# MAGIC > useful technique when designing dashboards with tightly related visualizations.
 
 # COMMAND ----------
 
