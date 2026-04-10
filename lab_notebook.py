@@ -230,8 +230,8 @@
 # MAGIC
 # MAGIC ```sql
 # MAGIC SELECT ROUND(
-# MAGIC   COUNT(CASE WHEN actual_delivery_date <= expected_delivery_date THEN 1 END) * 100.0
-# MAGIC   / COUNT(actual_delivery_date), 1
+# MAGIC   COUNT(CASE WHEN actual_delivery_date <= expected_delivery_date THEN 1 END)
+# MAGIC   / COUNT(actual_delivery_date), 3
 # MAGIC ) AS on_time_pct
 # MAGIC FROM workspace.ai_bi_lab.purchase_orders
 # MAGIC WHERE actual_delivery_date IS NOT NULL
@@ -240,8 +240,8 @@
 # MAGIC - **Visualization type:** Counter
 # MAGIC - **Value column:** `on_time_pct`
 # MAGIC - **Configuration:** In the right-hand sidebar, set **Value** to `on_time_pct`.
-# MAGIC   Then scroll down to the formatting section and add `%` in the **Suffix** field.
-# MAGIC   This displays the value as e.g. "85.3%".
+# MAGIC   Then set the **Type** to **Percentage** — the counter will automatically format
+# MAGIC   the decimal value as a percent (e.g., 0.853 displays as "85.3%").
 # MAGIC
 # MAGIC ---
 # MAGIC

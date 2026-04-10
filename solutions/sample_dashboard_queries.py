@@ -23,8 +23,8 @@
 
 # MAGIC %sql
 # MAGIC SELECT ROUND(
-# MAGIC   COUNT(CASE WHEN actual_delivery_date <= expected_delivery_date THEN 1 END) * 100.0
-# MAGIC   / COUNT(actual_delivery_date), 1
+# MAGIC   COUNT(CASE WHEN actual_delivery_date <= expected_delivery_date THEN 1 END) * 1.0
+# MAGIC   / COUNT(actual_delivery_date), 3
 # MAGIC ) AS on_time_pct
 # MAGIC FROM workspace.ai_bi_lab.purchase_orders
 # MAGIC WHERE actual_delivery_date IS NOT NULL
