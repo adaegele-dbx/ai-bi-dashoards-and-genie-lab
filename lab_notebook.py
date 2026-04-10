@@ -192,13 +192,23 @@
 # MAGIC %md
 # MAGIC ### 2b. Add KPI counter widgets
 # MAGIC
-# MAGIC Add four counter widgets across the top of your dashboard.  For each one:
-# MAGIC 1. Click the **+** button on the canvas, or click the **Dataset** dropdown and choose
-# MAGIC    **Create a dataset**
-# MAGIC 2. Paste the SQL query into the dataset editor
-# MAGIC 3. Click **Run** to verify the query works
-# MAGIC 4. Back on the canvas, drag a **Counter** visualization onto the layout
-# MAGIC 5. Point it to the dataset you just created
+# MAGIC Add four counter widgets across the top of your dashboard.  For each one, you'll
+# MAGIC first create a dataset, then add a widget and configure the visualization.
+# MAGIC
+# MAGIC **Create the dataset:**
+# MAGIC 1. Click the **Data** tab in the right-hand sidebar
+# MAGIC 2. Click **Add SQL dataset**
+# MAGIC 3. Paste the SQL query into the query editor
+# MAGIC 4. Click **Run** to verify the query returns results
+# MAGIC 5. Give the dataset a descriptive name (e.g., "Total Purchase Orders")
+# MAGIC
+# MAGIC **Add and configure the counter widget:**
+# MAGIC 1. Back on the canvas, click the **+** button to add a widget
+# MAGIC 2. In the right-hand sidebar, select the dataset you just created from the **Dataset** dropdown
+# MAGIC 3. Under **Visualization type**, select **Counter**
+# MAGIC 4. In the **Value** dropdown, choose the column to display (details below for each KPI)
+# MAGIC 5. Optionally configure formatting options like prefix, suffix, or label text in the
+# MAGIC    sections below the value selector
 # MAGIC
 # MAGIC ---
 # MAGIC
@@ -211,6 +221,8 @@
 # MAGIC
 # MAGIC - **Visualization type:** Counter
 # MAGIC - **Value column:** `total_orders`
+# MAGIC - **Configuration:** In the right-hand sidebar, set **Value** to `total_orders`.
+# MAGIC   Optionally add a label like "Total POs" in the **Label** field.
 # MAGIC
 # MAGIC ---
 # MAGIC
@@ -227,7 +239,9 @@
 # MAGIC
 # MAGIC - **Visualization type:** Counter
 # MAGIC - **Value column:** `on_time_pct`
-# MAGIC - **Tip:** Add a `%` suffix in the counter formatting options
+# MAGIC - **Configuration:** In the right-hand sidebar, set **Value** to `on_time_pct`.
+# MAGIC   Then scroll down to the formatting section and add `%` in the **Suffix** field.
+# MAGIC   This displays the value as e.g. "85.3%".
 # MAGIC
 # MAGIC ---
 # MAGIC
@@ -241,7 +255,9 @@
 # MAGIC
 # MAGIC - **Visualization type:** Counter
 # MAGIC - **Value column:** `total_spend`
-# MAGIC - **Tip:** Add a `$` prefix in the counter formatting options
+# MAGIC - **Configuration:** In the right-hand sidebar, set **Value** to `total_spend`.
+# MAGIC   Then scroll down to the formatting section and add `$` in the **Prefix** field.
+# MAGIC   This displays the value as e.g. "$1,234,567.89".
 # MAGIC
 # MAGIC ---
 # MAGIC
@@ -256,6 +272,8 @@
 # MAGIC
 # MAGIC - **Visualization type:** Counter
 # MAGIC - **Value column:** `low_stock_count`
+# MAGIC - **Configuration:** In the right-hand sidebar, set **Value** to `low_stock_count`.
+# MAGIC   Optionally add a label like "Low-Stock Items" in the **Label** field.
 
 # COMMAND ----------
 
