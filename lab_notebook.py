@@ -215,8 +215,10 @@
 # MAGIC #### KPI 1: Total Purchase Orders
 # MAGIC
 # MAGIC ```sql
-# MAGIC SELECT COUNT(*) AS total_orders
-# MAGIC FROM workspace.ai_bi_lab.purchase_orders
+# MAGIC SELECT s.region, COUNT(*) AS total_orders
+# MAGIC FROM workspace.ai_bi_lab.purchase_orders po
+# MAGIC JOIN workspace.ai_bi_lab.suppliers s ON po.supplier_id = s.supplier_id
+# MAGIC GROUP BY s.region
 # MAGIC ```
 # MAGIC
 # MAGIC - **Visualization type:** Counter
@@ -229,12 +231,14 @@
 # MAGIC #### KPI 2: On-Time Delivery Rate
 # MAGIC
 # MAGIC ```sql
-# MAGIC SELECT ROUND(
-# MAGIC   COUNT(CASE WHEN actual_delivery_date <= expected_delivery_date THEN 1 END)
-# MAGIC   / COUNT(actual_delivery_date), 3
+# MAGIC SELECT s.region, ROUND(
+# MAGIC   COUNT(CASE WHEN po.actual_delivery_date <= po.expected_delivery_date THEN 1 END) * 1.0
+# MAGIC   / COUNT(po.actual_delivery_date), 3
 # MAGIC ) AS on_time_pct
-# MAGIC FROM workspace.ai_bi_lab.purchase_orders
-# MAGIC WHERE actual_delivery_date IS NOT NULL
+# MAGIC FROM workspace.ai_bi_lab.purchase_orders po
+# MAGIC JOIN workspace.ai_bi_lab.suppliers s ON po.supplier_id = s.supplier_id
+# MAGIC WHERE po.actual_delivery_date IS NOT NULL
+# MAGIC GROUP BY s.region
 # MAGIC ```
 # MAGIC
 # MAGIC - **Visualization type:** Counter
@@ -248,9 +252,11 @@
 # MAGIC #### KPI 3: Total Spend
 # MAGIC
 # MAGIC ```sql
-# MAGIC SELECT ROUND(SUM(quantity * unit_cost), 2) AS total_spend
-# MAGIC FROM workspace.ai_bi_lab.purchase_orders
-# MAGIC WHERE status != 'cancelled'
+# MAGIC SELECT s.region, ROUND(SUM(po.quantity * po.unit_cost), 2) AS total_spend
+# MAGIC FROM workspace.ai_bi_lab.purchase_orders po
+# MAGIC JOIN workspace.ai_bi_lab.suppliers s ON po.supplier_id = s.supplier_id
+# MAGIC WHERE po.status != 'cancelled'
+# MAGIC GROUP BY s.region
 # MAGIC ```
 # MAGIC
 # MAGIC - **Visualization type:** Counter
@@ -264,10 +270,13 @@
 # MAGIC #### KPI 4: Current Low-Stock Items
 # MAGIC
 # MAGIC ```sql
-# MAGIC SELECT COUNT(*) AS low_stock_count
-# MAGIC FROM workspace.ai_bi_lab.inventory_snapshots
-# MAGIC WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM workspace.ai_bi_lab.inventory_snapshots)
-# MAGIC   AND quantity_on_hand < reorder_point
+# MAGIC SELECT s.region, COUNT(*) AS low_stock_count
+# MAGIC FROM workspace.ai_bi_lab.inventory_snapshots i
+# MAGIC JOIN workspace.ai_bi_lab.products p ON i.product_id = p.product_id
+# MAGIC JOIN workspace.ai_bi_lab.suppliers s ON p.supplier_id = s.supplier_id
+# MAGIC WHERE i.snapshot_date = (SELECT MAX(snapshot_date) FROM workspace.ai_bi_lab.inventory_snapshots)
+# MAGIC   AND i.quantity_on_hand < i.reorder_point
+# MAGIC GROUP BY s.region
 # MAGIC ```
 # MAGIC
 # MAGIC - **Visualization type:** Counter
@@ -305,12 +314,14 @@
 # MAGIC #### Chart 2: Orders Over Time
 # MAGIC
 # MAGIC ```sql
-# MAGIC SELECT DATE_TRUNC('month', order_date) AS order_month,
-# MAGIC        status,
+# MAGIC SELECT s.region,
+# MAGIC        DATE_TRUNC('month', po.order_date) AS order_month,
+# MAGIC        po.status,
 # MAGIC        COUNT(*) AS order_count
-# MAGIC FROM workspace.ai_bi_lab.purchase_orders
-# MAGIC GROUP BY order_month, status
-# MAGIC ORDER BY order_month, status
+# MAGIC FROM workspace.ai_bi_lab.purchase_orders po
+# MAGIC JOIN workspace.ai_bi_lab.suppliers s ON po.supplier_id = s.supplier_id
+# MAGIC GROUP BY s.region, order_month, po.status
+# MAGIC ORDER BY order_month, po.status
 # MAGIC ```
 # MAGIC
 # MAGIC - **Visualization type:** Line chart
@@ -323,12 +334,12 @@
 # MAGIC #### Chart 3: Delivery Performance by Supplier
 # MAGIC
 # MAGIC ```sql
-# MAGIC SELECT s.supplier_name,
-# MAGIC        ROUND(AVG(DATEDIFF(actual_delivery_date, expected_delivery_date)), 1) AS avg_days_variance
+# MAGIC SELECT s.region, s.supplier_name,
+# MAGIC        ROUND(AVG(DATEDIFF(po.actual_delivery_date, po.expected_delivery_date)), 1) AS avg_days_variance
 # MAGIC FROM workspace.ai_bi_lab.purchase_orders po
 # MAGIC JOIN workspace.ai_bi_lab.suppliers s ON po.supplier_id = s.supplier_id
 # MAGIC WHERE po.actual_delivery_date IS NOT NULL
-# MAGIC GROUP BY s.supplier_name
+# MAGIC GROUP BY s.region, s.supplier_name
 # MAGIC ORDER BY avg_days_variance
 # MAGIC ```
 # MAGIC
@@ -352,14 +363,14 @@
 # MAGIC 3. Paste the following query into the query editor:
 # MAGIC
 # MAGIC ```sql
-# MAGIC SELECT p.product_name, p.category, s.supplier_name,
+# MAGIC SELECT s.region, p.product_name, p.category, s.supplier_name,
 # MAGIC        SUM(po.quantity) AS total_quantity,
 # MAGIC        ROUND(SUM(po.quantity * po.unit_cost), 2) AS total_spend
 # MAGIC FROM workspace.ai_bi_lab.purchase_orders po
 # MAGIC JOIN workspace.ai_bi_lab.products p ON po.product_id = p.product_id
 # MAGIC JOIN workspace.ai_bi_lab.suppliers s ON po.supplier_id = s.supplier_id
 # MAGIC WHERE po.status != 'cancelled'
-# MAGIC GROUP BY p.product_name, p.category, s.supplier_name
+# MAGIC GROUP BY s.region, p.product_name, p.category, s.supplier_name
 # MAGIC ORDER BY total_spend DESC
 # MAGIC LIMIT 10
 # MAGIC ```
@@ -406,11 +417,12 @@
 # MAGIC - Add a **Text** widget above the second row: "Spend & Order Analysis"
 # MAGIC - Add a **Text** widget above the third row: "Delivery Performance"
 # MAGIC
-# MAGIC **Add a date filter:**
+# MAGIC **Add a region filter:**
 # MAGIC 1. Click **Add a filter** at the top of the canvas
-# MAGIC 2. Set the filter field to `order_date` on your `purchase_orders`-based datasets
-# MAGIC 3. Choose **Date range** as the filter type
-# MAGIC 4. This lets dashboard viewers interactively narrow down the time window
+# MAGIC 2. Set the filter field to `region`
+# MAGIC 3. Choose **Multi-select** as the filter type
+# MAGIC 4. Because every dataset now includes a `region` column, this single filter
+# MAGIC    controls all widgets on the dashboard — KPI counters, charts, and the table
 # MAGIC
 # MAGIC **Publish:**
 # MAGIC - Click **Publish** in the top-right corner to make the dashboard available for sharing
@@ -418,17 +430,18 @@
 # MAGIC ### 2f. Explore cross-filtering
 # MAGIC
 # MAGIC AI/BI dashboards support **cross-filtering** — clicking an element in one chart
-# MAGIC automatically filters other widgets that share the same dataset.  No configuration
-# MAGIC is needed; it works out of the box for bar charts, pie charts, heatmaps, and scatter
-# MAGIC plots.
+# MAGIC automatically filters other widgets that share a column with the same name.  No
+# MAGIC configuration is needed; it works out of the box for bar charts, pie charts,
+# MAGIC heatmaps, and scatter plots.
 # MAGIC
-# MAGIC Try it now:
+# MAGIC Because every dataset in this dashboard includes a `region` column, clicking a
+# MAGIC region in one chart will filter all the other widgets.  Try it now:
 # MAGIC
 # MAGIC 1. Click on a **single bar** in the "Spend by Supplier Region" chart (e.g., click
 # MAGIC    the "Asia-Pacific" bar)
 # MAGIC 2. Observe how the other widgets on the dashboard update — the KPI counters,
-# MAGIC    "Orders Over Time" chart, and the "Top 10 Products" table should all filter to
-# MAGIC    show only data for that region
+# MAGIC    "Orders Over Time" chart, "Delivery Performance" chart, and the "Top 10
+# MAGIC    Products" table should all filter to show only data for that region
 # MAGIC 3. Click the bar again (or click the **X** on the filter pill) to clear the filter
 # MAGIC 4. Try clicking a segment in the "Orders Over Time" chart — for example, click on
 # MAGIC    the "delayed" line for a specific month
@@ -437,8 +450,9 @@
 # MAGIC > exploration tool.  Business users can drill into specific regions, time periods,
 # MAGIC > or statuses without needing to write SQL — they just click.
 # MAGIC >
-# MAGIC > Cross-filtering works across any widgets that share a dataset.  If two charts
-# MAGIC > both use the `purchase_orders`-based dataset, clicking one filters the other.
+# MAGIC > This works because all datasets include the `region` column.  When you click a
+# MAGIC > region in "Spend by Supplier Region", the dashboard matches on `region` across
+# MAGIC > every other widget's dataset and filters them automatically.
 
 # COMMAND ----------
 
