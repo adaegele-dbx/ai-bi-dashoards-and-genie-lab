@@ -857,15 +857,16 @@
 # MAGIC ### 5a. Define benchmark questions
 # MAGIC
 # MAGIC Here are 5 benchmark questions that span different query patterns.  For each,
-# MAGIC the "Expected Behavior" column describes what correct SQL should look like.
+# MAGIC the "Ground Truth SQL" column provides the correct query to compare against
+# MAGIC Genie's generated SQL.
 # MAGIC
-# MAGIC | # | Question | Category | Expected Behavior |
-# MAGIC |---|----------|----------|-------------------|
-# MAGIC | 1 | How many suppliers are in Asia-Pacific? | Simple lookup | Count suppliers where `region = 'Asia-Pacific'` |
-# MAGIC | 2 | What is the average order value? | Calculation | `AVG(quantity * unit_cost)`, exclude cancelled |
-# MAGIC | 3 | Which warehouse has the most low-stock items? | Join | Join `inventory_snapshots` to `products`, filter latest date, count where qty < reorder, group by warehouse |
-# MAGIC | 4 | How has spend changed month over month? | Time-based | Monthly spend trend using `DATE_TRUNC`, exclude cancelled |
-# MAGIC | 5 | Who are our best suppliers? | Ambiguous | Should use on-time rate + reliability per instructions |
+# MAGIC | # | Question | Category | Ground Truth SQL |
+# MAGIC |---|----------|----------|------------------|
+# MAGIC | 1 | How many suppliers are in Asia-Pacific? | Simple lookup | `SELECT COUNT(*) AS supplier_count FROM suppliers WHERE region = 'Asia-Pacific'` |
+# MAGIC | 2 | What is the average order value? | Calculation | `SELECT ROUND(AVG(quantity * unit_cost), 2) AS avg_order_value FROM purchase_orders WHERE status != 'cancelled'` |
+# MAGIC | 3 | Which warehouse has the most low-stock items? | Join | `SELECT i.warehouse, COUNT(*) AS low_stock_items FROM inventory_snapshots i JOIN products p ON i.product_id = p.product_id WHERE i.snapshot_date = (SELECT MAX(snapshot_date) FROM inventory_snapshots) AND i.quantity_on_hand < i.reorder_point GROUP BY i.warehouse ORDER BY low_stock_items DESC LIMIT 1` |
+# MAGIC | 4 | How has spend changed month over month? | Time-based | `SELECT DATE_TRUNC('month', order_date) AS order_month, ROUND(SUM(quantity * unit_cost), 2) AS monthly_spend FROM purchase_orders WHERE status != 'cancelled' GROUP BY order_month ORDER BY order_month` |
+# MAGIC | 5 | Who are our best suppliers? | Ambiguous | `SELECT s.supplier_name, s.reliability_rating, ROUND(COUNT(CASE WHEN po.actual_delivery_date <= po.expected_delivery_date THEN 1 END) * 100.0 / NULLIF(COUNT(po.actual_delivery_date), 0), 1) AS on_time_pct FROM suppliers s JOIN purchase_orders po ON s.supplier_id = po.supplier_id WHERE po.actual_delivery_date IS NOT NULL GROUP BY s.supplier_name, s.reliability_rating ORDER BY on_time_pct DESC, s.reliability_rating DESC` |
 
 # COMMAND ----------
 
@@ -884,7 +885,7 @@
 # MAGIC **Tips for efficient benchmarking:**
 # MAGIC - Work through the questions in order — they progress in difficulty
 # MAGIC - After each question, click **"View query"** to see the SQL
-# MAGIC - Compare the SQL against the "Expected Behavior" column above
+# MAGIC - Compare the SQL against the "Ground Truth SQL" column above
 # MAGIC - Jot down notes on what went wrong for any Partial or Incorrect results
 
 # COMMAND ----------
