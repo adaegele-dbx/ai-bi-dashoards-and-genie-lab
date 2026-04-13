@@ -582,18 +582,18 @@
 # MAGIC ## Part 4 — Tune the Genie Space
 # MAGIC
 # MAGIC Out-of-the-box Genie understands your table schemas but not your **business logic**.
-# MAGIC Tuning bridges this gap through the Genie space **Settings** panel, where you
+# MAGIC Tuning bridges this gap through the Genie space **Configure** panel, where you
 # MAGIC configure metadata, rules, and trusted SQL that teach Genie how your business works.
 # MAGIC
 # MAGIC | Mechanism | Where to find it | What it does |
 # MAGIC |-----------|-----------------|-------------|
-# MAGIC | **Table & column descriptions** | Settings → Tables | Human-readable context for each table and column |
-# MAGIC | **Synonyms** | Settings → Tables (per column) | Map business terms to actual column names |
-# MAGIC | **Join relationships** | Settings → Tables | Explicitly define how tables connect |
-# MAGIC | **SQL expressions** | Settings → SQL expressions | Reusable measures, filters, and dimensions (the semantic layer) |
-# MAGIC | **General instructions** | Settings → Instructions | Business rules and definitions |
-# MAGIC | **Common questions** | Settings → Common questions | Curated examples that appear as suggestions |
-# MAGIC | **SQL queries and functions** | Settings → SQL queries and functions | Trusted, pre-written SQL for critical metrics |
+# MAGIC | **Table & column descriptions** | Configure → Data → Table | Human-readable context for each table and column |
+# MAGIC | **Synonyms** | Configure → Data → Table (per column) | Map business terms to actual column names |
+# MAGIC | **Join relationships** | Configure → Instructions | Explicitly define how tables connect |
+# MAGIC | **SQL expressions** | Configure → Instructions | Reusable measures, filters, and dimensions (the semantic layer) |
+# MAGIC | **General instructions** | Configure → Instructions | Business rules and definitions |
+# MAGIC | **Common questions** | Configure | Curated examples that appear as suggestions |
+# MAGIC | **SQL queries and functions** | Configure → Instructions | Trusted, pre-written SQL for critical metrics |
 # MAGIC
 # MAGIC > If you get stuck on what to add, check `solutions/genie_instructions.md` for
 # MAGIC > reference content.
@@ -640,7 +640,6 @@
 # MAGIC | price | `unit_cost` |
 # MAGIC | ETA | `expected_delivery_date` |
 # MAGIC | received date | `actual_delivery_date` |
-# MAGIC | order value | `quantity * unit_cost` |
 # MAGIC
 # MAGIC 5. **Save** the changes
 # MAGIC 6. Re-ask: **"What is the total order value for orders with an ETA in January 2025?"**
@@ -661,10 +660,10 @@
 # MAGIC
 # MAGIC | Left table | Right table | Join type | Join condition |
 # MAGIC |-----------|------------|-----------|----------------|
-# MAGIC | `purchase_orders` | `suppliers` | Inner | `purchase_orders.supplier_id = suppliers.supplier_id` |
-# MAGIC | `purchase_orders` | `products` | Inner | `purchase_orders.product_id = products.product_id` |
-# MAGIC | `inventory_snapshots` | `products` | Inner | `inventory_snapshots.product_id = products.product_id` |
-# MAGIC | `products` | `suppliers` | Inner | `products.supplier_id = suppliers.supplier_id` |
+# MAGIC | `purchase_orders` | `suppliers` | Many-To-One | `purchase_orders.supplier_id = suppliers.supplier_id` |
+# MAGIC | `purchase_orders` | `products` | Many-To-One | `purchase_orders.product_id = products.product_id` |
+# MAGIC | `inventory_snapshots` | `products` | Many-To-One | `inventory_snapshots.product_id = products.product_id` |
+# MAGIC | `products` | `suppliers` | Many-To-One | `products.supplier_id = suppliers.supplier_id` |
 # MAGIC
 # MAGIC 3. **Save** the changes
 # MAGIC
