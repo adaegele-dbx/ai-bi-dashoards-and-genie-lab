@@ -862,11 +862,11 @@
 # MAGIC
 # MAGIC | # | Question | Category | Ground Truth SQL |
 # MAGIC |---|----------|----------|------------------|
-# MAGIC | 1 | How many suppliers are in Asia-Pacific? | Simple lookup | `SELECT COUNT(*) AS supplier_count FROM suppliers WHERE region = 'Asia-Pacific'` |
-# MAGIC | 2 | What is the average order value? | Calculation | `SELECT ROUND(AVG(quantity * unit_cost), 2) AS avg_order_value FROM purchase_orders WHERE status != 'cancelled'` |
-# MAGIC | 3 | Which warehouse has the most low-stock items? | Join | `SELECT i.warehouse, COUNT(*) AS low_stock_items FROM inventory_snapshots i JOIN products p ON i.product_id = p.product_id WHERE i.snapshot_date = (SELECT MAX(snapshot_date) FROM inventory_snapshots) AND i.quantity_on_hand < i.reorder_point GROUP BY i.warehouse ORDER BY low_stock_items DESC LIMIT 1` |
-# MAGIC | 4 | How has spend changed month over month? | Time-based | `SELECT DATE_TRUNC('month', order_date) AS order_month, ROUND(SUM(quantity * unit_cost), 2) AS monthly_spend FROM purchase_orders WHERE status != 'cancelled' GROUP BY order_month ORDER BY order_month` |
-# MAGIC | 5 | Who are our best suppliers? | Ambiguous | `SELECT s.supplier_name, s.reliability_rating, ROUND(COUNT(CASE WHEN po.actual_delivery_date <= po.expected_delivery_date THEN 1 END) * 100.0 / NULLIF(COUNT(po.actual_delivery_date), 0), 1) AS on_time_pct FROM suppliers s JOIN purchase_orders po ON s.supplier_id = po.supplier_id WHERE po.actual_delivery_date IS NOT NULL GROUP BY s.supplier_name, s.reliability_rating ORDER BY on_time_pct DESC, s.reliability_rating DESC` |
+# MAGIC | 1 | How many suppliers are in Asia-Pacific? | Simple lookup | `SELECT COUNT(*) AS supplier_count FROM workspace.ai_bi_lab.suppliers WHERE region = 'Asia-Pacific'` |
+# MAGIC | 2 | What is the average order value? | Calculation | `SELECT ROUND(AVG(quantity * unit_cost), 2) AS avg_order_value FROM workspace.ai_bi_lab.purchase_orders WHERE status != 'cancelled'` |
+# MAGIC | 3 | Which warehouse has the most low-stock items? | Join | `SELECT i.warehouse, COUNT(*) AS low_stock_items FROM workspace.ai_bi_lab.inventory_snapshots i JOIN workspace.ai_bi_lab.products p ON i.product_id = p.product_id WHERE i.snapshot_date = (SELECT MAX(snapshot_date) FROM workspace.ai_bi_lab.inventory_snapshots) AND i.quantity_on_hand < i.reorder_point GROUP BY i.warehouse ORDER BY low_stock_items DESC LIMIT 1` |
+# MAGIC | 4 | How has spend changed month over month? | Time-based | `SELECT DATE_TRUNC('month', order_date) AS order_month, ROUND(SUM(quantity * unit_cost), 2) AS monthly_spend FROM workspace.ai_bi_lab.purchase_orders WHERE status != 'cancelled' GROUP BY order_month ORDER BY order_month` |
+# MAGIC | 5 | Who are our best suppliers? | Ambiguous | `SELECT s.supplier_name, s.reliability_rating, ROUND(COUNT(CASE WHEN po.actual_delivery_date <= po.expected_delivery_date THEN 1 END) * 100.0 / NULLIF(COUNT(po.actual_delivery_date), 0), 1) AS on_time_pct FROM workspace.ai_bi_lab.suppliers s JOIN workspace.ai_bi_lab.purchase_orders po ON s.supplier_id = po.supplier_id WHERE po.actual_delivery_date IS NOT NULL GROUP BY s.supplier_name, s.reliability_rating ORDER BY on_time_pct DESC, s.reliability_rating DESC` |
 
 # COMMAND ----------
 
